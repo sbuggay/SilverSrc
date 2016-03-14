@@ -66,3 +66,18 @@ int vid_set_display_mode(int mode)
 
 	return 1;
 }
+
+void vid_draw_pic(pakpicture_t pic, int x, int y)
+{
+	unsigned char *pixel = pic.data;
+	int i, j;
+	for (j = 0; j < pic.height; j++)
+	{
+		for (i = 0; i < pic.width; i++)
+		{
+			SDL_SetRenderDrawColor(renderer, palette[*pixel].red, palette[*pixel].green, palette[*pixel].blue, 0xFF);
+			SDL_RenderDrawPoint(renderer, x + i, y + j);
+			pixel++;
+		}
+	}
+}

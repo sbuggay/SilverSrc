@@ -48,3 +48,17 @@ unsigned char *pak_data(char *file_name)
 
 	return NULL;
 }
+
+pakpicture_t *pak_load_pic(char *file_name)
+{
+	unsigned char *data = pak_data(file_name);
+
+	pakpicture_t *pic = malloc(sizeof(pakpicture_t));
+
+	memcpy(&pic->width, data, sizeof(int));
+	memcpy(&pic->height, data + 4, sizeof(int));
+	pic->data = malloc(pic->width * pic->height);
+	memcpy(pic->data, data + 8, pic->width * pic->height);
+
+	return pic;
+}

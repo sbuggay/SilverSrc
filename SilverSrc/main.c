@@ -14,10 +14,12 @@ int main(int argc, char *argv[])
 
 	pak_load("id1/pak0.pak");
 
-	palette pal;
-	memcpy(&pal, pak_data("gfx/palette.lmp"), sizeof(pal));
 
+	memcpy(&palette, pak_data("gfx/palette.lmp"), sizeof(pakpalette_t));
 
+	pakpicture_t *finale = pak_load_pic("gfx/final.lmp");
+
+	
 	vid_init();
 
 	//Initialize SDL_mixer
@@ -33,7 +35,6 @@ int main(int argc, char *argv[])
 		printf("%i:\t%ix%i\t%dhz\t%i bpp\n", i, mode.w, mode.h, mode.refresh_rate, SDL_BITSPERPIXEL(mode.format));
 	}
 
-//	vid_set_display_mode(16);
 
 	SDL_Event event;
 
@@ -72,10 +73,8 @@ int main(int argc, char *argv[])
 			
 		}
 
-		SDL_Rect rect = { 0, 0, 30, 30 };
+		vid_draw_pic(*finale, 620, 20);
 
-		SDL_SetRenderDrawColor(renderer, 0xFF, 0x00, 0x00, 0xFF);
-		SDL_RenderFillRect(renderer, &rect);
 		SDL_RenderPresent(renderer);
 	}
 

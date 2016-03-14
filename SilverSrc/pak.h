@@ -31,13 +31,13 @@ typedef struct
 	unsigned char red;
 	unsigned char green;
 	unsigned char blue;
-} palette[256];
+} pakpalette_t[256];
 
 typedef struct
 {
 	int width;
 	int height;
-	unsigned char *color;
+	unsigned char *data;
 } pakpicture_t;
 
 typedef struct
@@ -61,3 +61,4 @@ typedef struct
 
 void pak_load(char *file_name);
 unsigned char *pak_data(char *file_name);
+pakpicture_t *pak_load_pic(char *file_name);
