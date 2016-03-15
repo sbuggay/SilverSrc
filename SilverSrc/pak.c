@@ -3,55 +3,75 @@
 #include <stdlib.h>
 
 #include "pak.h"
+#include "io.h"
 
-FILE *file;
+int pak_handle = 0;
+pak_t paks[MAX_PAK];
 
-int num_entries;
-pakentry_t entries[MAX_PAK_ENTRIES];
-
-void pak_load(char *file_name)
+int pak_load(char *file_name) 
 {
-	
-	fopen_s(&file, file_name, "r");
+
+	int handle;
+	int size = file_open(file_name, &handle);
 
 	pakheader_t header;
-	fread(&header, sizeof(pakheader_t), 1, file);
+	file_read(handle, &header, sizeof(pakheader_t));
 
+
+	// Verify PAK signiture
 	if (header.magic[0] != 'P' ||
 		header.magic[1] != 'A' ||
 		header.magic[2] != 'C' ||
 		header.magic[3] != 'K')
-		return;
+		return -1;
 
-	num_entries = header.size / sizeof(pakentry_t);
+	int num_entries = header.size / sizeof(pakentry_t);
 
-	fseek(file, header.offset, 0);
+	file_seek(handle, header.offset, 0);
 
-	fread((void *)entries, sizeof(pakentry_t), num_entries, file);
+	strcpy_s(paks[pak_handle].name, 256, file_name);
+	paks[pak_handle].handle = handle;
+	paks[pak_handle].count = num_entries;
+	paks[pak_handle].data = malloc(sizeof(pakentry_t) * num_entries);
+	file_read(handle, paks[pak_handle].data, sizeof(pakentry_t) * num_entries);
+
+	return pak_handle++;
 }
 
-unsigned char *pak_data(char *file_name)
+int pak_data(char *file_name, uint8_t **dst)
 {
-	int i;
-	for (i = 0; i < num_entries; i++)
+	// Start with the last loaded pak first
+	// This could be done with a linked list
+	int i, j;
+	for (i = pak_handle - 1; i >= 0; i--)
 	{
-		if (strcmp(entries[i].name, file_name) == 0)
+		for (j = 0; j < paks[i].count; j++)
 		{
-			printf("%s@%d[%d]\n", entries[i].name, entries[i].offset, entries[i].size);
-			fseek(file, entries[i].offset, 0);
-			unsigned char *data = malloc(entries[i].size);
-			fread((char *)data, entries[i].size, 1, file);
-			return data;
-		}
-			
-	}
+			pakentry_t *data = paks[i].data;
+			if (strcmp(data[j].name, file_name) == 0)
+			{
+				printf("%s@%d[%d]\n", data[j].name, data[j].offset, data[j].size);
+				file_seek(paks[i].handle, data[j].offset, 0);
+				uint8_t *buffer = malloc(data[j].size);
+				
+				file_read(paks[i].handle, buffer, data[j].size);
 
-	return NULL;
+				*dst = buffer;
+				return data[j].size;
+			}
+
+		}
+	}
+	return 0;
 }
 
 pakpicture_t *pak_load_pic(char *file_name)
 {
-	unsigned char *data = pak_data(file_name);
+	uint8_t *data = NULL;
+	pak_data(file_name, &data);
+
+	if (!data)
+		return NULL;
 
 	pakpicture_t *pic = malloc(sizeof(pakpicture_t));
 

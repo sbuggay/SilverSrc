@@ -2,6 +2,10 @@
 
 #include "vid.h"
 #include "common.h"
+#include <string.h>
+#include <stdio.h>
+
+
 
 int vid_init()
 {
@@ -20,14 +24,13 @@ int vid_init()
 	if (window == NULL) {
 		return -1;
 	}
-
-	if(!com_check_param("-sw"))
-		SDL_SetWindowFullscreen(window, 0);
+//
+//	if(!com_check_param("-sw"))
+//		SDL_SetWindowFullscreen(window, 0);
 
 	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_SOFTWARE);
 
 	int display_count = 0, display_index = 0, mode_index = 0;
-	
 
 	if ((display_count = SDL_GetNumVideoDisplays()) < 1) {
 		SDL_Log("SDL_GetNumVideoDisplays returned: %i", display_count);
@@ -42,6 +45,7 @@ int vid_init()
 		SDL_GetDisplayMode(display_index, mode_index, &mode);
 		display_modes[mode_index] = mode;
 	}
+
 
 	return 0;
 }
@@ -67,16 +71,21 @@ int vid_set_display_mode(int mode)
 	return 1;
 }
 
+void vid_draw_pixel(int index, int x, int y)
+{
+	SDL_SetRenderDrawColor(renderer, vid_palette[index].red, vid_palette[index].green, vid_palette[index].blue, 0xFF);
+	SDL_RenderDrawPoint(renderer, x, y);
+}
+
 void vid_draw_pic(pakpicture_t pic, int x, int y)
 {
-	unsigned char *pixel = pic.data;
+	uint8_t *pixel = pic.data;
 	int i, j;
 	for (j = 0; j < pic.height; j++)
 	{
 		for (i = 0; i < pic.width; i++)
 		{
-			SDL_SetRenderDrawColor(renderer, palette[*pixel].red, palette[*pixel].green, palette[*pixel].blue, 0xFF);
-			SDL_RenderDrawPoint(renderer, x + i, y + j);
+			vid_draw_pixel(*pixel, x + i, y + j);
 			pixel++;
 		}
 	}

@@ -1,11 +1,10 @@
 #include <stdio.h>
-#include <string.h>
-
-#include <SDL_mixer.h>
 
 #include "vid.h"
 #include "pak.h"
 #include "common.h"
+#include <string.h>
+
 
 int main(int argc, char *argv[])
 {
@@ -13,20 +12,20 @@ int main(int argc, char *argv[])
 	
 
 	pak_load("id1/pak0.pak");
+	pak_load("id1/pak1.pak");
+
+	// Set up palette
+	uint8_t *buffer = NULL;
+	pak_data("gfx/palette.lmp", &buffer);
+
+	memcpy(&vid_palette, buffer, sizeof(pakpalette_t));
 
 
-	memcpy(&palette, pak_data("gfx/palette.lmp"), sizeof(pakpalette_t));
+	pakpicture_t *finale = pak_load_pic("gfx/finale.lmp");
 
-	pakpicture_t *finale = pak_load_pic("gfx/final.lmp");
 
-	
+
 	vid_init();
-
-	//Initialize SDL_mixer
-	if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0)
-	{
-		printf("SDL_mixer could not initialize! SDL_mixer Error: %s\n", Mix_GetError());
-	}
 
 	int i;
 	for (i = 0; i < num_display_modes; i++)
@@ -39,7 +38,6 @@ int main(int argc, char *argv[])
 	SDL_Event event;
 
 	int quit = 0;
-
 
 	while (!quit)
 	{
@@ -73,11 +71,12 @@ int main(int argc, char *argv[])
 			
 		}
 
-		vid_draw_pic(*finale, 620, 20);
+		vid_draw_pic(*finale, 20, 20);
 
 		SDL_RenderPresent(renderer);
 	}
 
+	free(finale);
 
 	vid_quit();
 
