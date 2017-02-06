@@ -8,15 +8,16 @@
 int pak_handle = 0;
 pak_t paks[MAX_PAK];
 
-int pak_load(char *file_name) 
-{
+int pak_load(char *file_name)  {
 
-	int handle;
-	int size = file_open(file_name, &handle);
-
+	unsigned int handle, size;
+	if (size = file_open(file_name, &handle) == -1) {
+		printf("no file %s\n", file_name);
+		return -1;
+	}
+		
 	pakheader_t header;
 	file_read(handle, &header, sizeof(pakheader_t));
-
 
 	// Verify PAK signiture
 	if (header.magic[0] != 'P' ||
@@ -35,21 +36,23 @@ int pak_load(char *file_name)
 	paks[pak_handle].data = malloc(sizeof(pakentry_t) * num_entries);
 	file_read(handle, paks[pak_handle].data, sizeof(pakentry_t) * num_entries);
 
+	printf("contents of pak: %s\n", paks[pak_handle].name);
+	for (int j = 0; j < paks[pak_handle].count; j++) {
+		pakentry_t *data = paks[pak_handle].data;
+		printf("%s@%d[%d] @@ ", data[j].name, data[j].offset, data[j].size);
+	}
+
 	return pak_handle++;
 }
 
-int pak_data(char *file_name, uint8_t **dst)
-{
+int pak_data(char *file_name, uint8_t **dst) {
 	// Start with the last loaded pak first
 	// This could be done with a linked list
 	int i, j;
-	for (i = pak_handle - 1; i >= 0; i--)
-	{
-		for (j = 0; j < paks[i].count; j++)
-		{
+	for (i = pak_handle - 1; i >= 0; i--) {
+		for (j = 0; j < paks[i].count; j++) {
 			pakentry_t *data = paks[i].data;
-			if (strcmp(data[j].name, file_name) == 0)
-			{
+			if (strcmp(data[j].name, file_name) == 0) {
 				printf("%s@%d[%d]\n", data[j].name, data[j].offset, data[j].size);
 				file_seek(paks[i].handle, data[j].offset, 0);
 				uint8_t *buffer = malloc(data[j].size);
@@ -59,14 +62,12 @@ int pak_data(char *file_name, uint8_t **dst)
 				*dst = buffer;
 				return data[j].size;
 			}
-
 		}
 	}
 	return 0;
 }
 
-pakpicture_t *pak_load_pic(char *file_name)
-{
+pakpicture_t *pak_load_pic(char *file_name) {
 	uint8_t *data = NULL;
 	pak_data(file_name, &data);
 

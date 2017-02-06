@@ -234,3 +234,5 @@ _Pvt_Extensions
 
 # FAKE - F# Make
 .fake/
+/SilverSrc/Id1
+/SilverSrc.VC.db
