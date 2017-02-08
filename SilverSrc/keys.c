@@ -4,7 +4,6 @@
 
 #include "keys.h"
 
-char key_input[MAXCMDLINE] = { 0 };
 int key_linepos = 0;
 
 char keydown[256];

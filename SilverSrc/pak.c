@@ -36,11 +36,7 @@ int pak_load(char *file_name)  {
 	paks[pak_handle].data = malloc(sizeof(pakentry_t) * num_entries);
 	file_read(handle, paks[pak_handle].data, sizeof(pakentry_t) * num_entries);
 
-	printf("contents of pak: %s\n", paks[pak_handle].name);
-	for (int j = 0; j < paks[pak_handle].count; j++) {
-		pakentry_t *data = paks[pak_handle].data;
-		printf("%s@%d[%d] @@ ", data[j].name, data[j].offset, data[j].size);
-	}
+	printf("Loaded pak %s@%d\n", paks[pak_handle].name, paks[pak_handle].handle);
 
 	return pak_handle++;
 }
@@ -52,8 +48,9 @@ int pak_data(char *file_name, uint8_t **dst) {
 	for (i = pak_handle - 1; i >= 0; i--) {
 		for (j = 0; j < paks[i].count; j++) {
 			pakentry_t *data = paks[i].data;
+			printf("%s / ", data[j].name);
 			if (strcmp(data[j].name, file_name) == 0) {
-				printf("%s@%d[%d]\n", data[j].name, data[j].offset, data[j].size);
+				printf("%s@%d %db\n", data[j].name, data[j].offset, data[j].size);
 				file_seek(paks[i].handle, data[j].offset, 0);
 				uint8_t *buffer = malloc(data[j].size);
 				

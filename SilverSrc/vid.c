@@ -6,7 +6,7 @@
 
 int vid_init() {
 
-	SDL_Init(SDL_INIT_VIDEO);
+	SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO);
 
 	window = SDL_CreateWindow("SilverSrc", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
 		640, 480, SDL_WINDOW_OPENGL);
@@ -47,6 +47,10 @@ int vid_set_display_mode(int mode) {
 	SDL_SetWindowDisplayMode(window, &display_modes[mode]);
 
 	return 1;
+}
+
+void vid_render() {
+	SDL_RenderPresent(renderer);
 }
 
 void vid_set_palette() {

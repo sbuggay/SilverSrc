@@ -3,12 +3,17 @@
 #include <string.h>
 
 #include "vid.h"
+#include "draw.h"
+#include "audio.h"
 #include "pak.h"
 #include "keys.h"
 #include "common.h"
 #include "cmd.h"
+#include "test.h"
 
 int main(int argc, char *argv[]) {
+
+	test_init();
 
 	com_init_param(argc, argv);
 
@@ -22,11 +27,12 @@ int main(int argc, char *argv[]) {
 	memcpy(&vid_palette, buffer, sizeof(pakpalette_t));
 
 	pakpicture_t *finale = pak_load_pic("gfx/conback.lmp");
-
-	// Are these needed?
-	atexit(SDL_Quit);
 	
+	uint8_t *audiotest = NULL;
+	pak_data("sound/doors/medtry.wav", &audiotest);
+
 	vid_init();
+	audio_init();
 
 	SDL_Event event;
 	int quit = 0;
@@ -42,12 +48,13 @@ int main(int argc, char *argv[]) {
 				break;
 			case SDL_KEYDOWN:
 				key_console(event.key.keysym.sym);
+				audio_play(audiotest);
 				break;
 			}
 		}
 
 		vid_draw_pic(*finale, 0, 0);
-		SDL_RenderPresent(renderer);
+		vid_render();
 	}
 
 	free(finale);
